@@ -42,7 +42,7 @@ public class Main {
 			X[i] = DX*i;
 		}
 		
-		// 繝輔ぃ繧､繝ｫ蜃ｺ蜉�
+		// ファイルの出力
 		try(PrintWriter pWriter = new PrintWriter("OutputFiles/singular.txt")){
 			pWriter.println("test");
 		}catch (Exception e) {
