@@ -19,7 +19,7 @@ public class Main {
 		double[] ELBPR = new double[NN];
 		double[] DBDXPR = new double[NN];
 		
-		//パラメータの設定
+		//繝代Λ繝｡繝ｼ繧ｿ縺ｮ險ｭ螳�
 		double XL1 = 0.12;
 		double XL2 = 0.12;
 		double XL3 = 0.12;
@@ -32,17 +32,17 @@ public class Main {
 		double DX = 0.005;
 		
 		double AMP = 10000.1;
-		int IXL1 = (int) (XL1/AMP);
-		int IXL2 = (int) (XL2/AMP);
-		int IXL3 = (int) (XL3/AMP);
-		int IDX = (int)(DX/AMP);
+		int IXL1 = (int) (XL1*AMP);
+		int IXL2 = (int) (XL2*AMP);
+		int IXL3 = (int) (XL3*AMP);
+		int IDX = (int)(DX*AMP);
 		int IEND = (IXL1+ IXL2 + IXL3)/IDX + 1;
  		
 		for(int i = 0;i<IEND;i++) {
 			X[i] = DX*i;
 		}
 		
-		// ファイル出力
+		// 繝輔ぃ繧､繝ｫ蜃ｺ蜉�
 		try(PrintWriter pWriter = new PrintWriter("OutputFiles/singular.txt")){
 			pWriter.println("test");
 		}catch (Exception e) {
