@@ -1,6 +1,7 @@
 package suiri2_1;
 
 import java.io.PrintWriter;
+import java.nio.DoubleBuffer;
 
 public class Main {
 	public static void main(String... args) {
@@ -72,6 +73,42 @@ public class Main {
 		
 		//IINI : 上流端から数えた特異点直下流の格子番号
 		int IINI = (int)(XS/DX) + 2;
+		
+		//DXI : 特異点とその直下流の格子点の座標の差
+		//H(IINI) : 特異点直下流の格子点の水深
+		double DXI = DX*(IINI-1) - XS;
+		H[IINI] = HC + DXI * DHS2;
+		
+		double PARA1,PARA2,PARA3;
+		
+		if(X[IINI] >= XL1 && X[IINI] <= (XL1 + XL2)) {
+			PARA1 = X[IINI] - XL2 * 0.5 - XL1;
+			PARA2 = Math.pow(Math.pow(R0, 2.)-Math.pow(PARA1, 2.),0.5);
+			PARA3 = Math.pow(Math.pow(R0, 2.)-Math.pow(XL2*0.5, 2.),0.5);
+			// DELT : 路床高さ
+			DELT[IINI] = PARA2 - PARA3;
+			DDELT[IINI] = -PARA1/PARA2;
+		}
+		
+		if(X[IINI] < XL1 || X[IINI] > (XL1+XL2)) {
+			DELT[IINI] = 0.0;
+			DDELT[IINI] = 0.0;
+		}
+		
+		// HDUM:疑似等流水深の計算（存在しない場合は１００．０）
+		if((ANGS-ANGC*DDELT[IINI]) <= 0.0) {
+			HDUM[IINI] = 100.;
+		}else {
+			HDUM[IINI] = Math.pow((Math.pow(AN, 2.) * Math.pow(Q, 2.)/(ANGS - ANGC*DDELT[IINI])),0.3);
+		}
+		
+		// 水面形の追跡（ルンゲ・クッタ法）
+		for(int i = IINI +1 ;i<=IEND;i++) {
+			
+			
+			
+		}
+		
 		
 	}
 }
