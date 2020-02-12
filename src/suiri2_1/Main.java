@@ -2,6 +2,9 @@ package suiri2_1;
 
 import java.io.PrintWriter;
 import java.nio.DoubleBuffer;
+import java.util.function.DoubleToLongFunction;
+
+import org.omg.CosNaming._BindingIteratorImplBase;
 
 public class Main {
 	public static void main(String... args) {
@@ -31,6 +34,7 @@ public class Main {
 		double Q  = 0.0076;
 		double DG = 9.8;
 		double DX = 0.005;
+		
 		
 		
 		//Number of grids
@@ -79,7 +83,10 @@ public class Main {
 		double DXI = DX*(IINI-1) - XS;
 		H[IINI] = HC + DXI * DHS2;
 		
-		double PARA1,PARA2,PARA3;
+		double PARA1,PARA2,PARA3,PARA4,PARA5,PARA6,PARA7;
+		double DDELT0=0.0;
+		double DDELT1 = 0.0;
+		double DDELT2=0.0;
 		
 		if(X[IINI] >= XL1 && X[IINI] <= (XL1 + XL2)) {
 			PARA1 = X[IINI] - XL2 * 0.5 - XL1;
@@ -104,11 +111,63 @@ public class Main {
 		
 		// 水面形の追跡（ルンゲ・クッタ法）
 		for(int i = IINI +1 ;i<=IEND;i++) {
+			if(X[i-1] < XL1 || X[i-1] >= (XL1+XL2) ) {
+				DELT[i-1] = 0.0;
+				DDELT[i-1] = 0.0;
+				DDELT0=DDELT[i-1];
+				DDELT1=0.;
+				DDELT2=0.;
+			}
+			//ルンゲクッタ法で計算するための前処理
+			if(X[i-1] >= XL1 && X[i-1] < (XL1 + XL2)) {
+				PARA1 = X[i-1] - XL2*0.5 - XL1;
+				PARA2 = Math.pow(R0*R0-PARA1*PARA1,0.5);
+				PARA3 = Math.pow(R0*R0-(XL2*0.5)*(XL2*0.5),0.5);
+				 DELT[i-1] = PARA2 - PARA3;
+				 DDELT[i-1] = -PARA1/PARA2;
+				 DDELT0 = DDELT[i-1];
+				PARA4 = X[i-1] + DX * 0.5 - XL2 * 0.5 - XL1;
+				PARA5 = Math.pow(R0*R0-PARA4*PARA4,0.5);
+				 DDELT1 = -PARA4/PARA5;
+				PARA6 = X[i-1] + DX - XL2 * 0.5 - XL1;
+				PARA7 = Math.pow(R0*R0-PARA6*PARA6,0.5);
+				DDELT2 = -PARA6/PARA7;
+			}
+			// 疑似等流水深の計算（存在しない場合 HDUM = 100.0とする)
+			if((ANGS-ANGC*DDELT2) <= 0.) {
+				HDUM[i] = 100.;
+			}else {
+				HDUM[i]= Math.pow(AN*AN*Q*Q/(ANGS-ANGC*DDELT2), 0.3);
+			}
 			
+			//水深の計算（ルンゲ・クッタ法）
+			double ED1 = AN*AN * Q*Q / Math.pow(H[i-1],3.3333333);
+			double DUM1 = DX * (ANGS-ANGC*DDELT0-ED1)/(ANGC - Q*Q/DG/Math.pow(H[i-1], 3));
+			double HDUM2 = H[i-1] + DUM1 * 0.5;
+			double ED2 = AN*AN * Q*Q/Math.pow(HDUM2, 3.333333333);
+			double DUM2 = DX*(ANGS - ANGC*DDELT1-ED2) / (ANGC - Q*Q/DG/Math.pow(HDUM2, 3.));
+			double HDUM3 = H[i-1] + DUM2 * 0.5;
+			double ED3 = AN*AN * Q*Q /Math.pow(HDUM3, 3.33333333);
+			double DUM3 = DX*(ANGS - ANGC*DDELT1-ED3) / (ANGC - Q*Q/DG/Math.pow(HDUM3, 3.));
+			double HDUM4 = H[i-1] + DUM3;
+			double ED4 = AN*AN * Q*Q/Math.pow(HDUM4, 3.33333333);
+			double DUM4 = DX*(ANGS - ANGC*DDELT2-ED4) / (ANGC - Q*Q/DG/Math.pow(HDUM4, 3.));
 			
-			
+			H[i] = H[i-1] + (DUM1 + 2.*(DUM2 + DUM3) + DUM4)/6.;
+		}
+		//プリント用変数への置き換え
+		for(int i = IINI;i<=IEND;i++) {
+			HPR[i] = H[i];
+			ELPR[i] = H[i] + DELT[i];
+			ETOUPR[i] = HDUM[i] + DELT[i];
+			ECRPR[i] = HC + DELT[i];
+			ELBPR[i] = DELT[i];
+			DBDXPR[i] = DDELT[i];
 		}
 		
+		// ***********************************************************************************
+		//         特異点から上流への水面形の追跡
+		// *****************************************************************************
 		
-	}
-}
+	} //main method
+} // class end
