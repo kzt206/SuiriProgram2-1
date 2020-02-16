@@ -211,6 +211,7 @@ public class Main {
 				DDELT1 = 0.;
 				DDELT2 = 0.;
 			}
+			
 			if(X[i-1] >= XL3 && X[i-1] < (XL3+XL2)) {
 				PARA1 = XL2 * 0.5 + XL3 - X[i-1];
 				PARA2 = Math.pow(R0*R0-PARA1*PARA1, 0.5);
