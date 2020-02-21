@@ -271,8 +271,10 @@ public class Main {
 		System.out.printf("Singular point XS=%10.6f(m),SuimenKoubai DH/DX=%8.4f, or \n", XS,DHS1,DHS2);
 		System.out.printf("Parameter : XL1=%8.4f(m), XL2=%7.3f(m), XL3=%7.3f(m), Slope=%8.4f, manning coef. = %7.3f,"
 				+ "Tani-haba ryuryou=%8.4f(m2/s)\n", XL1,XL2,XL3,ANGS,AN,Q);
-		System.out.printf("    X(m),      H(m),     SUII(m),  TOURYU(m),  GENKAI(m),  ZB(m)\n");
-		
+		System.out.printf("      X(m),     H(m),   SUII(m), TOURYU(m),GENKAI(m),  ZB(m)\n");
+		for(int i=0;i<=IEND;i++) {
+			System.out.printf("  %8.4f  %8.4f  %8.4f  %8.4f  %8.4f  %8.4f\n", X[i],HPR[i],ELPR[i],ETOUPR[i],ECRPR[i],ELBPR[i]);
+		}
 		
 		
 	} // main method
