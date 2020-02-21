@@ -2,6 +2,8 @@ package suiri2_1;
 
 import java.io.PrintWriter;
 import java.nio.DoubleBuffer;
+import java.security.spec.ECParameterSpec;
+import java.util.EventListenerProxy;
 import java.util.IllegalFormatCodePointException;
 import java.util.function.DoubleToLongFunction;
 
@@ -221,13 +223,55 @@ public class Main {
 				DDELT[i-1] = PARA1/PARA2;
 				PARA4 = XL2 * 0.5 + XL3 - X[i-1] -DX*0.5;
 				PARA5 = Math.pow(R0*R0-PARA4*PARA4, 0.5);
+				DDELT1=PARA4/PARA5;
+				PARA6=XL2*0.5 + XL3-X[i-1] -DX;
+				PARA7 = Math.pow(R0*R0-PARA6*PARA6, 0.5);
+				DDELT2 = PARA6/PARA7;
+			}
+			// 疑似等流水深の計算（存在しない場合HDUM = 100.0）とする
+			if(ANGS + ANGC*DDELT2 <= 0.) {
+				HDUM[i-1] = 100.;
+			}else {
+				HDUM[i-1] = Math.pow(AN*AN*Q*Q/(ANGS + ANGC*DDELT2), 0.3);
 			}
 			
+			//水深の計算
+			double ED1 = AN*AN*Q*Q/Math.pow(H[i-1], 3.33333);
+			double DUM1 = DX*(-ANGS-ANGC*DDELT0+ED1)/(ANGC-Q*Q/DG/H[i-1]*H[i-1]*H[i-1]);
+			double HDUM2 = H[i-1] + DUM1 * 0.5;
+			double ED2 = AN*AN*Q*Q/Math.pow(HDUM2, 3.33333);
+			double DUM2 = DX*(-ANGS-ANGC*DDELT1+ED2)/(ANGC-Q*Q/DG/HDUM2*HDUM2*HDUM2);
+			double HDUM3 = H[i-1] + DUM2 * 0.5;
+			double ED3 = AN*AN*Q*Q/Math.pow(HDUM3, 3.33333);
+			double DUM3 = DX*(-ANGS-ANGC*DDELT1+ED3)/(ANGC-Q*Q/DG/HDUM3*HDUM3*HDUM3);
+			double HDUM4 = H[i-1] + DUM3;
+			double ED4 = AN*AN*Q*Q/Math.pow(HDUM4, 3.33333);
+			double DUM4 = DX*(-ANGS-ANGC*DDELT2+ED4)/(ANGC-Q*Q/DG/HDUM4*HDUM4*HDUM4);
 			
-			
-			
+			H[i] = H[i-1] + (DUM1 + 2.0*(DUM2+DUM3) + DUM4)/6.;
 			
 		}
+		
+		//プリント用変数への置き換え
+		for(int i  = IINI0;i<=IEND;i++) {
+			// IMOTO; 上流端から数えた格子点番号
+			int IMOTO = IEND - i +1;
+			HPR[IMOTO] = H[i];
+			ELPR[IMOTO] = H[i] + DELT[i];
+			ETOUPR[IMOTO] = HDUM[i] + DELT[i];
+			ECRPR[IMOTO] = HC + DELT[i];
+			ELBPR[IMOTO] = DELT[i];
+			DBDXPR[IMOTO] = DDELT[i];
+		}
+		
+		// ********************************************************************
+		//     結果の印刷
+		// ********************************************************************
+		System.out.println("Tokki wo Koeru suimenkei no keisan.");
+		System.out.printf("Singular point XS=%10.6f(m),SuimenKoubai DH/DX=%8.4f, or \n", XS,DHS1,DHS2);
+		System.out.printf("Parameter : XL1=%8.4f(m), XL2=%7.3f(m), XL3=%7.3f(m), Slope=%8.4f, manning coef. = %7.3f,"
+				+ "Tani-haba ryuryou=%8.4f(m2/s)\n", XL1,XL2,XL3,ANGS,AN,Q);
+		System.out.printf("    X(m),      H(m),     SUII(m),  TOURYU(m),  GENKAI(m),  ZB(m)\n");
 		
 		
 		
